@@ -51,14 +51,15 @@ class ExpoRegistrar
      * Removes token of a given interest
      *
      * @param $interest
+     * @param $token
      *
      * @throws ExpoRegistrarException
      *
      * @return bool
      */
-    public function removeInterest($interest)
+    public function removeInterest($interest, $token = null)
     {
-        if (!$this->repository->forget($interest)) {
+        if (!$this->repository->forget($interest, $token)) {
             throw ExpoRegistrarException::couldNotRemoveInterest();
         }
 
@@ -79,10 +80,20 @@ class ExpoRegistrar
         $tokens = [];
 
         foreach ($interests as $interest) {
-            $token = $this->repository->retrieve($interest);
+            $retrieved = $this->repository->retrieve($interest);
 
-            if (!is_null($token)) {
-                $tokens[] = $token;
+            if (!is_null($retrieved)) {
+                if(is_string($retrieved)) {
+                    $tokens[] = $retrieved;
+                }
+
+                if(is_array($retrieved)) {
+                    foreach($retrieved as $token) {
+                        if(is_string($token)) {
+                            $tokens[] = $token;
+                        }
+                    }
+                }
             }
         }
 
